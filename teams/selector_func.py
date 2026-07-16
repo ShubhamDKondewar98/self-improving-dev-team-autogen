@@ -1,4 +1,5 @@
-from autogen_agentchat.messages import BaseAgentEvent, BaseChatMessage
+from autogen_agentchat.base import TerminatedException
+from autogen_agentchat.messages import BaseAgentEvent, BaseChatMessage, StopMessage
 from typing import Sequence
 import json
 
@@ -66,24 +67,14 @@ class SelectorFunc():
             else:
                 raise RuntimeError(f"select() reached unexpected failure_category: {verdict['failure_category']}")
 
-            
-
         raise RuntimeError(f"select() reached unexpected last_message.source: {last_message.source}")
             
-
-
-
-
-
-    def my_selector_fun(self,messages: Sequence[BaseAgentEvent | BaseChatMessage]):
-        pass 
-
-
 
  #whos_next =  messages[-1].source     ###   data for whos_next   need to be capture 
 getcount = SelectorFunc(0,0,0,0)   ##  passing xount zero initially 
 
 #getcount.lastcalled(whos_next)
+
 
 
     
