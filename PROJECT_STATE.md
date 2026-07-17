@@ -107,3 +107,33 @@ teams/
   test_retry_count directly (Option B), no message parsing needed.
 Combined in dev_team.py via OR (|):
   termination = CriticVerdictTermination(critic_agent) | RetryCapTermination(selector) | <token cap condition>
+
+
+### Termination — full picture (LOCKED, finalized)
+Three termination conditions combined via OR (|):
+1. CriticVerdictTermination(critic_agent) — PASS or AMBIGUOUS_REQUIREMENT
+2. RetryCapTermination(selector_instance) — code_retry_count/test_retry_count
+   reaching their caps
+3. TokenUsageTermination(max_total_token=60000) — built-in AutoGen class,
+   no custom implementation needed
+
+Retry caps: max_code_retries = 3, max_test_retries = 3 (locked).
+
+Token cap: max_total_token = 60000 — derived estimate, not measured.
+Reasoning: ~13–16 worst-case agent calls in one fully-exhausted run
+(1 Planner + up to 4 Coder + up to 4–7 Test-writer + up to 4 Critic),
+roughly 1,000–2,000 tokens/call → ~15–30k tokens worst case, with cap set
+at ~2x that estimate for headroom since a too-tight cap failing a healthy
+run is worse than a bit of wasted spend on a run that would've failed
+anyway. FLAGGED FOR REVISIT: after first 2-3 real end-to-end test runs,
+check actual token usage in logs and tighten/loosen this number based on
+real data rather than the current estimate.
+
+
+### File ownership principle (established during termination_conditions.py review)
+Class *definitions* (reusable logic) live in their own dedicated files
+(selector_func.py, termination_conditions.py). Configured *instances*
+(specific numbers, specific agent references, the actual wiring for THIS
+run) live in dev_team.py, which owns final assembly responsibility.
+token_termination = TokenUsageTermination(max_total_token=60000) belongs
+in dev_team.py, not termination_conditions.py, for this reason.

@@ -1,7 +1,9 @@
 from autogen_agentchat.base import TerminatedException
+#from autogen_agentchat.conditions import TokenUsageTermination
 from autogen_agentchat.messages import BaseAgentEvent, BaseChatMessage, StopMessage
 from typing import Sequence
 import json
+from autogen_agentchat.base import TerminationCondition
  
 
 class CriticVerdictTermination(TerminationCondition):
@@ -96,3 +98,5 @@ class RetryCapTermination(TerminationCondition):
         self._terminated = False
 
                 
+
+#token_termination = TokenUsageTermination(max_total_token=60000)
