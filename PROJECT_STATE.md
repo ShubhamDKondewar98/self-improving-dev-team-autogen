@@ -147,4 +147,16 @@ is not guaranteed to emit real JSON null vs. the string "null".
 attempt_logger.py must normalize this when parsing Coder messages:
 if parsed.get("change_summary") == "null": parsed["change_summary"] = None
 (same treatment for addressed_feedback). Do not rely on `is None` checks
-against raw parsed LLM JSON without this normalization step.
+against raw parsed LLM JSON without this normalization step. 
+
+### Correction: retry_recommended dropped from Critic schema
+Originally locked with 4 fields (verdict, failure_category, reasoning,
+retry_recommended). Reopened during critic_agent.py implementation:
+select() never reads retry_recommended (only checks verdict/failure_category
+for routing), and no defined criteria existed for when the Critic should
+set it — an undefined field an LLM is told to fill in produces inconsistent,
+essentially random output. Cut per the established structure principle
+(routing OR reporting need only). DEFERRED, not deleted as an idea: could
+return as a soft "human attention" signal in the PDF report layer, IF a
+clear definition is written for it at that point. Current Critic schema:
+verdict, failure_category, reasoning — 3 fields, not 4.
