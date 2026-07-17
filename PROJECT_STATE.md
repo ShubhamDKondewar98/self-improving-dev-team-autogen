@@ -137,3 +137,14 @@ Class *definitions* (reusable logic) live in their own dedicated files
 run) live in dev_team.py, which owns final assembly responsibility.
 token_termination = TokenUsageTermination(max_total_token=60000) belongs
 in dev_team.py, not termination_conditions.py, for this reason.
+
+
+### Known defensive-parsing requirement (for attempt_logger.py, when built)
+Confirmed via test: json.loads('{"x": "null"}')["x"] returns the STRING
+"null", not Python None — these behave differently in `is None` checks.
+LLM output for Coder's change_summary/addressed_feedback (null on attempt 1)
+is not guaranteed to emit real JSON null vs. the string "null".
+attempt_logger.py must normalize this when parsing Coder messages:
+if parsed.get("change_summary") == "null": parsed["change_summary"] = None
+(same treatment for addressed_feedback). Do not rely on `is None` checks
+against raw parsed LLM JSON without this normalization step.
