@@ -97,3 +97,13 @@ teams/
                                  # stopping logic only, kept separate from routing
                                  # per the routing-vs-stopping distinction established
                                  # during selector_func design
+
+
+### Termination classes (LOCKED, implemented in teams/termination_conditions.py)
+- CriticVerdictTermination(critic_agent) — parses Critic's JSON from messages,
+  stops on verdict==PASS or failure_category==AMBIGUOUS_REQUIREMENT.
+- RetryCapTermination(selector_instance) — holds a reference to the same
+  Selector instance used by selector_func; reads live code_retry_count/
+  test_retry_count directly (Option B), no message parsing needed.
+Combined in dev_team.py via OR (|):
+  termination = CriticVerdictTermination(critic_agent) | RetryCapTermination(selector) | <token cap condition>
