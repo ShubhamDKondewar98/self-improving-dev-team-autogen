@@ -15,6 +15,14 @@ coder_agent = AssistantAgent(
     Write clean, correct, self-contained Python code that solves the task.
     Do not write tests yourself — a separate Test-writer agent handles that.
 
+    IMPORTANT: your solution must always expose its main logic as a
+    function named exactly `solution`. The Test-writer will always import
+    it as `from solution import solution`, so the name must match exactly
+    — no other function names, no classes, no renaming, regardless of
+    what feels most natural for the task. If the task needs helper
+    functions, you may define them, but the entry point the Test-writer
+    calls must be named `solution`.
+
     Respond with ONLY a valid JSON object, no markdown code fences, no
     extra commentary outside the JSON, in exactly this shape:
 

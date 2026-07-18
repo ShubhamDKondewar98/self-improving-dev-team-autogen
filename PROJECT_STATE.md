@@ -159,4 +159,33 @@ essentially random output. Cut per the established structure principle
 (routing OR reporting need only). DEFERRED, not deleted as an idea: could
 return as a soft "human attention" signal in the PDF report layer, IF a
 clear definition is written for it at that point. Current Critic schema:
-verdict, failure_category, reasoning — 3 fields, not 4.
+verdict, failure_category, reasoning — 3 fields, not 4. 
+
+### Test execution signal (LOCKED, verified via real Docker/pytest probes)
+- Outer exit_code (from execute_code_blocks): does NOT distinguish
+  COMPLETED vs INFRA_ERROR — confirmed 0 in all three tested scenarios
+  (all-pass, mixed pass/fail, syntax error). NOT used for routing.
+- Decision signal: parse_pytest_summary(pytest_stdout) —
+  regex-extracts "(\d+) passed" and "(\d+) failed" from pytest's summary
+  line. Returns {"passed": int, "failed": int} if either regex matches
+  (a legitimate result was produced, including all-pass with 0 failed
+  since pytest omits "N failed" text when there are none) → COMPLETED.
+  Returns None if neither matches (syntax error / collection error /
+  nothing ran) → INFRA_ERROR.
+- Verified via 3 real Docker probes: all-passing ("3 passed in 0.16s"),
+  mixed ("1 failed, 1 passed..."), syntax error ("1 error in 1.06s",
+  no passed/failed text at all, pytest exit code 2).
+
+
+  ### Correction: Coder must expose a fixed entry-point function name
+Added constraint: Coder's solution must always define a function named
+exactly `solution` (can internally call as many helper functions as
+needed — task complexity absorbed inside `solution`, not exposed as
+multiple public functions). Reasoning: Test-writer needs a reliable,
+deterministic way to import the Coder's code without parsing/guessing
+function names from arbitrary generated code — `from solution import
+solution` becomes a static, unconditional import with zero failure mode,
+instead of introducing a new fragile INFRA_ERROR source (import errors
+from mismatched/unpredictable function names). Standard pattern, same
+convention used by coding-assessment platforms (LeetCode, HackerRank)
+for the same reliability reason.
