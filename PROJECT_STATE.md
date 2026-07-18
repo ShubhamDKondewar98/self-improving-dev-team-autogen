@@ -189,3 +189,16 @@ instead of introducing a new fragile INFRA_ERROR source (import errors
 from mismatched/unpredictable function names). Standard pattern, same
 convention used by coding-assessment platforms (LeetCode, HackerRank)
 for the same reliability reason.
+
+
+### test_agent.py — VERIFIED end-to-end (not just designed)
+run_tests_in_docker tested directly (bypassing the LLM) with two real
+scenarios:
+1. Mixed pass/fail solution+test pair -> correctly returned COMPLETED,
+   {"passed": 1, "failed": 1}, error_detail: null
+2. Syntax error in test file -> correctly returned INFRA_ERROR,
+   results: null, error_detail containing full pytest traceback
+Both confirm the parse_pytest_summary() decision rule works correctly
+through the actual function, not just in isolated probes.
+Fixed filenames (solution.py, test_solution.py) confirmed safe -- each
+call gets a fresh Docker container via docker_util.py.
