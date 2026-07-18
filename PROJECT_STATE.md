@@ -202,3 +202,18 @@ Both confirm the parse_pytest_summary() decision rule works correctly
 through the actual function, not just in isolated probes.
 Fixed filenames (solution.py, test_solution.py) confirmed safe -- each
 call gets a fresh Docker container via docker_util.py.
+
+
+### dev_team.py — implemented and verified
+build_dev_team() assembles: 4 agents (imported from agents/), one shared
+SelectorFunc instance (0/0 counters, max caps from constants), 
+CriticVerdictTermination + RetryCapTermination(same selector_instance) +
+TokenUsageTermination combined via OR, wired into SelectorGroupChat with
+selector_func=selector_instance.select (bound method, not the class or
+an unbound method — see reasoning locked earlier).
+Deliberately a FUNCTION, not a module-level variable, so run_manager.py
+can call it fresh per run for isolated retry counters.
+allow_repeated_speaker=True required — routing table has agents speaking
+consecutively (e.g. Test-writer -> Test-writer on INFRA_ERROR retry).
+VERIFIED: full import chain across every file built this session
+succeeds, team constructs without error.

@@ -20,6 +20,9 @@ class SelectorFunc():
     def select(self, messages):
         last_message = messages[-1]
 
+        #print(f"DEBUG: source={last_message.source!r}, type={type(last_message).__name__}, content={last_message.content!r}")
+
+
         # Case 1: conversation just started, nobody has spoken yet
         if len(messages) == 1:
             return self.planner_agent.name  
@@ -34,7 +37,13 @@ class SelectorFunc():
 
         # Case 4: Test-writer just finished — need to parse its structured output
         if last_message.source == self.test_agent.name:
-            result = json.loads(last_message.content)
+            try:
+                result = json.loads(last_message.content)
+            except json.JSONDecodeError:
+                # Treat malformed Test-writer output the same as INFRA_ERROR —
+                # no legitimate result exists, not the Coder's fault, retry test side.
+                self.test_retry_count = self.test_retry_count + 1
+                return self.test_agent.name
 
             if result["execution_status"] == "INFRA_ERROR":
                 self.test_retry_count = self.test_retry_count + 1
@@ -42,13 +51,24 @@ class SelectorFunc():
 
             elif result["execution_status"] == "COMPLETED":
                 return self.critic_agent.name
-            
-            else :
+
+            else:
                 raise RuntimeError(f"select() reached unexpected execution_status: {result['execution_status']}")
 
-        # Case 5: Critic just finished — this is the branchiest one, parse its JSON too
+
+            # Case 5: Critic just finished — this is the branchiest one, parse its JSON too
         if last_message.source == self.critic_agent.name:
-            verdict = json.loads(last_message.content)
+            try:
+                verdict = json.loads(last_message.content)
+            except json.JSONDecodeError:
+                # Malformed Critic JSON is treated as terminal, same category as
+                # AMBIGUOUS_REQUIREMENT — CriticVerdictTermination is responsible
+                # for catching this and stopping the run. If select() is reached
+                # again after this, termination didn't fire as expected.
+                raise RuntimeError(
+                    "select() received malformed JSON from Critic — "
+                    "CriticVerdictTermination should have terminated the run before this."
+                )
 
             if verdict["verdict"] == "PASS":
                 raise RuntimeError("select() reached PASS branch — termination_condition should have stopped this")
@@ -56,16 +76,20 @@ class SelectorFunc():
             elif verdict["failure_category"] == "CODE_BUG":
                 self.code_retry_count = self.code_retry_count + 1
                 return self.coder_agent.name
-            
+
             elif verdict["failure_category"] == "TEST_BUG":
                 self.test_retry_count = self.test_retry_count + 1
                 return self.test_agent.name
-            
+
             elif verdict["failure_category"] == "AMBIGUOUS_REQUIREMENT":
                 raise RuntimeError("select() reached AMBIGUOUS_REQUIREMENT branch — termination_condition should have stopped this")
-            
+
             else:
                 raise RuntimeError(f"select() reached unexpected failure_category: {verdict['failure_category']}")
+
+        
+
+        
 
         raise RuntimeError(f"select() reached unexpected last_message.source: {last_message.source}")
         

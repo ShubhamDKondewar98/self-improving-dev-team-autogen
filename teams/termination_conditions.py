@@ -27,23 +27,36 @@ class CriticVerdictTermination(TerminationCondition):
         return self._terminated
 
     async def __call__(self, messages: Sequence[BaseAgentEvent | BaseChatMessage]) -> StopMessage | None:
-        
         if self._terminated:
-                raise TerminatedException("Termination condition has already been reached")
-        
+            raise TerminatedException("Termination condition has already been reached")
+
         for msg in messages:
             if msg.source == self.critic_agent.name:
-                verdict = json.loads(msg.content)
+                try:
+                    verdict = json.loads(msg.content)
+                except json.JSONDecodeError:
+                    self._terminated = True
+                    return StopMessage(
+                        content="Run stopped early: Critic produced malformed JSON "
+                                "(treated as a possible planning gap / unresolvable case).",
+                        source="CriticVerdictTermination",
+                    )
 
                 if verdict["verdict"] == "PASS":
                     self._terminated = True
-                    return StopMessage(content="Run succeeded: Critic returned PASS verdict.", source="CriticVerdictTermination")
+                    return StopMessage(
+                        content="Run succeeded: Critic returned PASS verdict.",
+                        source="CriticVerdictTermination",
+                    )
 
                 if verdict.get("failure_category") == "AMBIGUOUS_REQUIREMENT":
                     self._terminated = True
-                    return StopMessage(content="Run stopped early: Critic flagged AMBIGUOUS_REQUIREMENT "
-                                "(possible planning gap, not retried).", source="CriticVerdictTermination")
-                
+                    return StopMessage(
+                        content="Run stopped early: Critic flagged AMBIGUOUS_REQUIREMENT "
+                                "(possible planning gap, not retried).",
+                        source="CriticVerdictTermination",
+                    )
+
         return None
             
             
