@@ -68,14 +68,4 @@ class SelectorFunc():
                 raise RuntimeError(f"select() reached unexpected failure_category: {verdict['failure_category']}")
 
         raise RuntimeError(f"select() reached unexpected last_message.source: {last_message.source}")
-            
-
- #whos_next =  messages[-1].source     ###   data for whos_next   need to be capture 
-getcount = SelectorFunc(0,0,0,0)   ##  passing xount zero initially 
-
-#getcount.lastcalled(whos_next)
-
-
-
-    
         
