@@ -69,4 +69,7 @@ outputs/
 reports/*.pdf
 
 # Docker
-*.pid
+*.piddocker_workspace/
+docker_probe_workspace/
+docker_workspace/
+docker_probe_workspace/
