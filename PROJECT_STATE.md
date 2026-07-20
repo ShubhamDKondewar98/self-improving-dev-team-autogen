@@ -217,3 +217,39 @@ allow_repeated_speaker=True required — routing table has agents speaking
 consecutively (e.g. Test-writer -> Test-writer on INFRA_ERROR retry).
 VERIFIED: full import chain across every file built this session
 succeeds, team constructs without error.
+
+
+### Defensive JSON parsing — added after real smoke-test failure
+First real end-to-end run hit a JSONDecodeError on last_message.content
+being empty — root cause: tool-calling agents (Test-writer) produce
+multiple intermediate messages per turn (ToolCallRequestEvent,
+ToolCallExecutionEvent, final text), and select() can be invoked on any
+of these. Rather than solving this at the message-filtering level, added
+try/except around json.loads() at both consumption points:
+- select(): Test-writer parse failure -> treated as INFRA_ERROR
+  (increment test_retry_count, retry Test-writer) — reuses existing
+  established path, no new logic.
+- select(): Critic parse failure -> raises RuntimeError (backstop only;
+  actual termination handled by CriticVerdictTermination below).
+- CriticVerdictTermination: Critic parse failure -> treated as
+  equivalent to AMBIGUOUS_REQUIREMENT, terminates run, escalates to
+  human. Both select() and CriticVerdictTermination independently parse
+  the same Critic message, so both needed the fix — patching only one
+  would leave the other to crash on the same malformed input.
+VERIFIED: 2 clean end-to-end smoke test runs post-fix, no crashes.
+
+
+### run_manager.py — fixed after real test run
+- build_dev_team() now returns (team, selector_instance) directly,
+  replacing the fragile team._selector_func.__self__ private-attribute
+  trick.
+- Added final_test_result field: captures the Test-writer's last JSON
+  output even when the Critic never spoke (e.g. test_retry_count
+  exhaustion) — without this, a pure test-side failure had zero
+  diagnostic info in the returned dict.
+- Fixed messages_summary: some AutoGen messages (tool-calling agents)
+  have non-string .content (list of FunctionCall/FunctionExecutionResult
+  objects), which crashed json.dump() in attempt_logger.py. Filtered to
+  only include string content in the summary.
+VERIFIED: main.py runs end-to-end without crashing, log file written
+successfully.

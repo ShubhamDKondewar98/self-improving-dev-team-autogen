@@ -48,4 +48,4 @@ def build_dev_team() -> SelectorGroupChat:
         allow_repeated_speaker=True,
     )
 
-    return team
+    return team , selector_instance

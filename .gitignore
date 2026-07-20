@@ -1,0 +1,72 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Virtual environments ---
+.venv/
+venv/
+ENV/
+env/
+
+# --- uv ---
+# NOTE: uv.lock should generally be committed for reproducibility.
+# Do NOT ignore it. Left here as a comment reminder, not a rule.
+
+# --- Environment / secrets ---
+.env
+.env.local
+*.env
+!.env.example
+
+# --- Streamlit ---
+.streamlit/secrets.toml
+
+# --- Testing / coverage ---
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# --- Type checkers / linters ---
+.mypy_cache/
+.ruff_cache/
+.pytype/
+
+# --- IDE ---
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Project-specific ---
+# Attempt logs / run artifacts — decide if these should be tracked or not.
+# If you want sample logs in the repo for demo purposes, comment the next line out.
+logs/
+*.json.log
+outputs/
+reports/*.pdf
+
+# Docker
+*.pid

@@ -1,0 +1,21 @@
+
+import subprocess
+
+with open("solution.py", "w") as f:
+    f.write('def solution(n):\n    if n <= 1:\n        return False\n    if n <= 3:\n        return True\n    if n % 2 == 0 or n % 3 == 0:\n        return False\n    i = 5\n    while i * i <= n:\n        if n % i == 0 or n % (i + 2) == 0:\n            return False\n        i += 6\n    return True\n')
+
+with open("test_solution.py", "w") as f:
+    f.write('import pytest\nfrom solution import solution\n\n# Edge case: n is less than 2\ndef test_non_positive_numbers():\n    assert not solution(0)\n    assert not solution(1)\n\n# Test small prime numbers\ndef test_small_primes():\n    assert solution(2)\n    assert solution(3)\n    assert solution(5)\n    assert solution(7)\n\n# Test small non-prime numbers\ndef test_small_non_primes():\n    assert not solution(4)\n    assert not solution(6)\n    assert not solution(8)\n    assert not solution(9)\n\n# Test larger numbers\ndef test_large_primes():\n    assert solution(29)\n    assert solution(31)\n    assert solution(37)\n\n# Test larger non-prime numbers\ndef test_large_non_primes():\n    assert not solution(35)\n    assert not solution(49)\n    assert not solution(100)\n\n# Performance test with a large prime number\n# Here, 104729 is the 10000th prime number\n@pytest.mark.timeout(1)\ndef test_large_prime_performance():\n    assert solution(104729)\n\n# Performance test with a large non-prime number\n@pytest.mark.timeout(1)\ndef test_large_non_prime_performance():\n    assert not solution(104728)\n\n# Test even numbers larger than 2\n@pytest.mark.parametrize("n", range(4, 100, 2))\ndef test_even_numbers(n):\n    assert not solution(n)\n')
+
+subprocess.run(["pip", "install", "-q", "pytest"])
+result = subprocess.run(
+    ["pytest", "test_solution.py", "-v"],
+    capture_output=True,
+    text=True,
+)
+print("PYTEST_STDOUT_START")
+print(result.stdout)
+print("PYTEST_STDOUT_END")
+print("PYTEST_STDERR_START")
+print(result.stderr)
+print("PYTEST_STDERR_END")

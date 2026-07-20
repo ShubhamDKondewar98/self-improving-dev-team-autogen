@@ -1,0 +1,21 @@
+
+import subprocess
+
+with open("solution.py", "w") as f:
+    f.write('\ndef solution(a, b):\n    return a + b\n')
+
+with open("test_solution.py", "w") as f:
+    f.write('\nfrom solution import solution\n\ndef test_basic()\n    assert solution(2, 3) == 5\n')
+
+subprocess.run(["pip", "install", "-q", "pytest"])
+result = subprocess.run(
+    ["pytest", "test_solution.py", "-v"],
+    capture_output=True,
+    text=True,
+)
+print("PYTEST_STDOUT_START")
+print(result.stdout)
+print("PYTEST_STDOUT_END")
+print("PYTEST_STDERR_START")
+print(result.stderr)
+print("PYTEST_STDERR_END")

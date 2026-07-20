@@ -1,0 +1,7 @@
+
+def add(a, b):
+    return a + b
+
+assert add(2, 3) == 5, "should be 5"
+assert add(2, 2) == 5, "deliberately wrong to see a FAILURE case"
+print("done")

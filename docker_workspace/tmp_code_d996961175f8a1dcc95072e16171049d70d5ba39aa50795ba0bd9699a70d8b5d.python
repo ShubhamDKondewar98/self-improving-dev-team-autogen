@@ -1,0 +1,21 @@
+
+import subprocess
+
+with open("solution.py", "w") as f:
+    f.write('def solution(a, b):\n    return a + b\n')
+
+with open("test_solution.py", "w") as f:
+    f.write("import pytest\nfrom solution import solution\n\n# Tests for the sum of two numbers\n\ndef test_sum_positive_numbers():\n    assert solution(1, 2) == 3\n    assert solution(100, 200) == 300\n\n\ndef test_sum_negative_numbers():\n    assert solution(-1, -2) == -3\n    assert solution(-100, -200) == -300\n\n\ndef test_sum_mixed_sign_numbers():\n    assert solution(-1, 2) == 1\n    assert solution(100, -200) == -100\n    assert solution(-100, 200) == 100\n\n\ndef test_sum_zero():\n    assert solution(0, 0) == 0\n    assert solution(0, 5) == 5\n    assert solution(5, 0) == 5\n\n\ndef test_sum_floats():\n    assert solution(1.5, 2.5) == 4.0\n    assert solution(-1.1, -2.9) == -4.0\n\n\ndef test_large_numbers():\n    assert solution(10**18, 10**18) == 2 * 10**18\n\n# This part will raise an error if run, as the solution assumes numeric inputs only\ndef test_non_numeric_inputs():\n    with pytest.raises(TypeError):\n        solution('a', 'b')\n    with pytest.raises(TypeError):\n        solution(1, 'b')\n    with pytest.raises(TypeError):\n        solution('a', 1)\n    with pytest.raises(TypeError):\n        solution(None, None)")
+
+subprocess.run(["pip", "install", "-q", "pytest"])
+result = subprocess.run(
+    ["pytest", "test_solution.py", "-v"],
+    capture_output=True,
+    text=True,
+)
+print("PYTEST_STDOUT_START")
+print(result.stdout)
+print("PYTEST_STDOUT_END")
+print("PYTEST_STDERR_START")
+print(result.stderr)
+print("PYTEST_STDERR_END")
