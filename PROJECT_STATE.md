@@ -253,3 +253,16 @@ VERIFIED: 2 clean end-to-end smoke test runs post-fix, no crashes.
   only include string content in the summary.
 VERIFIED: main.py runs end-to-end without crashing, log file written
 successfully.
+
+
+### MILESTONE: Full end-to-end system verified through Streamlit UI
+All core files complete and tested together for the first time:
+run_manager.py -> attempt_logger.py -> streamlit_app.py (Run tab,
+History tab, Approve/Reject with update_attempt_decision persisting
+to the same log file). Fixed a real corrupted-log-file bug discovered
+during testing (truncated JSON from an interrupted run) by hardening
+load_attempt() to return None on parse failure instead of crashing,
+with streamlit_app.py's history loop skipping None entries gracefully.
+Remaining: pdf_report.py (untested, depends on unconfirmed fpdf2 dep),
+a deliberate retry-path stress test (only PASS-on-first-try runs seen
+so far), and README polish for interview presentation.
